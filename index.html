@@ -16,22 +16,40 @@
 <script src="lib/brain.js"></script>
 <script src="lib/neural-networks.js"></script>
 <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/build/three.min.js"></script>
-  
 <script src="app/DRACOLoader.js"></script>
-<link rel="stylesheet" href="styles.css">
+<script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
 
+<link rel="stylesheet" href="styles.css">
 </head>
 <body >
     <!-- <h1 class="info">example text that cannot be moved</h1> -->
+    <div class="sidebarWrapper">
+        <div id="sidebarArrow" class="arrow open"></div>
+        <div id="sidebar" class="sidebar">
+            <h1>Sidebar</h1>
+
+            <div class="sidebarSection">
+                <button id="">Calibrate Sensor</button>
+            </div>
+            <div class="sidebarSection">
+                <p>Upload Images or 3D Models(.glb format)</p>
+                <input type="file"/>
+            </div>
+            
+            <div class="sidebarSection">
+                <button id="toggleBackground">Toggle Background</button>
+            </div>
+            
+        </div>
+    </div>
     <div class="viewZone"> 
         <div id="object"> </div>
-    </div>
-    <div>
-        <button onclick=changeBackgroundColor>Toggle Background</button>
+    
     </div>
   
 </body>
-<!-- <script src="app/trainer.js" type="module"></script> -->
 <script src="app/main.js" type="module"></script>
 <script src="app/scene.js" type="module"></script>
+
+<!-- <script src="app/trainer.js" type="module"></script> -->
 </html>

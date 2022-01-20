@@ -1,11 +1,15 @@
 import {animate} from "./scene.js";
-// import { flattenData } from "./flatten.js";
-import { flattenData2 } from "./flatten2.js";
+import { flattenData, swipeData } from "./gestures.js";
+// import { flattenData2 } from "./flatten2.js";
 
 // Setup Leap loop with frame callback function
 // TRAIN LEAP
-var trainer = new LeapTrainer.ANNController();
-trainer.fromJSON(flattenData2);
+var trainer = new LeapTrainer.Controller();
+var nntrainer = new LeapTrainer.ANNController();
+trainer.fromJSON(flattenData);
+
+// trainer.fromJSON(swipeData);
+// nntrainer.fromJSON(swipeData);
 // console.log(trainer, trainer.gestures);
 
 var controller = Leap.loop(function(frame) {
@@ -23,15 +27,25 @@ var controller = Leap.loop(function(frame) {
   }
   
   if ((rightHand && rightHand.type) || (leftHand && leftHand.type)){
-    animate(rightHand, leftHand, trainer);
+    animate(rightHand, leftHand, trainer, nntrainer);
   }
 })
 
+// DOCUMENT EVENT LISTENERS
+var sidebarOpen = true;
+document.getElementById("sidebarArrow").addEventListener("click", toggleSidebar);
 
-
-// export function checkLibrary() {
-//   if (typeof Leap === "undefined") {
-//     document.getElementById("main").innerHTML = "The Leap JavaScript client library (leap.js file) was not found. Please download the library from the GitHub project at <a href='https://github.com/leapmotion/leapjs'>https://github.com/leapmotion/leapjs</a>."
-//     alert("The Leap JavaScript client library (leap.js file) was not found. Please download the latest version from the GitHub project at https://github.com/leapmotion/leapjs");
-//   }
-// }
+export function toggleSidebar() {
+    console.log("sidebarOpen", sidebarOpen);
+    sidebarOpen = !sidebarOpen;
+    const sidebar = document.getElementById("sidebar");
+    const arrow = document.getElementById("sidebarArrow");
+    
+    if (sidebarOpen) {
+      sidebar.classList.remove("hide");
+      arrow.classList.add("open");
+    } else {
+      sidebar.classList.add("hide");
+      arrow.classList.remove("open");
+    }
+}

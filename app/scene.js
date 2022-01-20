@@ -2,22 +2,22 @@ import { load3DModel, loadSpriteImage, loadImageScreen } from "../../app/loaders
 // CONSTANTS
 const SCREEN_OFFSET_X = 40;
 const SCREEN_OFFSET_Y = 350;
-var previous_time = Date.now();
+const X_SCALE_OFFSET = 70;
+const Y_SCALE_OFFSET = 80;
 var rotating_delay = Date.now();
-var grabbing_time = Date.now();
-var loop_delay = Date.now();
-
-var checkForSwipe = false;
-var handX;
+var forScreenshare = false;
 var currentlyGrabbedObject = false;
 var currentlyPinchedObject = false;
 var currentlyHighlightedObject = false;
 var currentlyRotatingObject = false;
+var activeObject = false;
+
+var gestureRecogitionOn = false;
 
 // FOR THREEJS SCENE BUILDING
 const scene = new THREE.Scene();
 // set background color
-scene.background = new THREE.Color( 0xffffff);
+scene.background = new THREE.Color(0xffffff);
 var light = new THREE.AmbientLight(0x404040);
 scene.add(light);
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -44,10 +44,10 @@ window.addEventListener('resize', onWindowResize, false);
 load3DModel('assets/city.glb', scene, 0.1);
 loadImageScreen('img/baozi.jpg', scene, 4, 3, 0.5);
 
+//CREATE CURSORS
 const right_cursor_geo = new THREE.CircleGeometry( 0.1, 32 );
 const right_cursor_material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 const right_cursor = new THREE.Mesh( right_cursor_geo, right_cursor_material );
-
 scene.add( right_cursor );
 right_cursor.userData = { isGrabbing: false, isPinching: false };
 
@@ -59,7 +59,7 @@ left_cursor.userData = { isGrabbing: false, isPinching: false };
 
 camera.position.z = 5;
 
-const empty_vector = new THREE.Vector3( 0,0, 0);
+const empty_vector = new THREE.Vector3( 0, 0, 0);
 
 console.log(scene.objects);
 
@@ -105,7 +105,7 @@ export function animate(rightHand, leftHand, trainer) {
         }
 
         if (leftHand.pinchStrength == 1) {
-            left_cursor.userData.isPinching =true;
+            left_cursor.userData.isPinching = true;
         } else {
             left_cursor.userData.isPinching = false;
         }
@@ -121,24 +121,12 @@ export function animate(rightHand, leftHand, trainer) {
     var leftIsPinching = left_cursor.userData.isPinching;
 
     if (!rightCursorPosition.equals(empty_vector)){
-        // console.log(rightCursorPosition, "right");
-        right_cursor.position.set(rightCursorPosition.x/70, (rightCursorPosition.y/80), 0);
+        right_cursor.position.set(rightCursorPosition.x/X_SCALE_OFFSET, (rightCursorPosition.y/Y_SCALE_OFFSET), 0);
     }
     if (!leftCursorPosition.equals(empty_vector)){
-        // console.log(leftCursorPosition, "left");
-        left_cursor.position.set(leftCursorPosition.x/70, leftCursorPosition.y/80, 0);
+        left_cursor.position.set(leftCursorPosition.x/X_SCALE_OFFSET, leftCursorPosition.y/Y_SCALE_OFFSET, 0);
     }
 
-    if (trainer) {
-        trainer.on('FLATTEN', function() { 
-            if (obj.rightOverlapped){
-                console.log("flattening object");
-                obj.mesh.rotation.x -= Math.PI/2;
-            }
-         });
-        // trainer.on('LIFT', function() { console.log('LIFT!'); });
-    }
-    
     // loop through all objects in scene
     for (var i = scene.objects.length - 1; i >= 0; i--)  {
         // console.log("currently grabbing: ", currentlyGrabbedObject);
@@ -156,43 +144,11 @@ export function animate(rightHand, leftHand, trainer) {
             obj.rightOverlapped = false;
         }
         
-        // console.log(obj.rightOverlapped, "right overlapped", rightIsGrabbing);            
-        // delete objects with a swipe
-        if (leftIsGrabbing && obj.leftOverlapped && !rightIsGrabbing) {
-            console.log("swipe");
-            
-            if (!checkForSwipe) {
-                checkForSwipe = true;
-                console.log("check for swipe now");
-                handX = right_cursor.position.x;
-                highlight(obj, 0xb342f5);
-            }
-            // implement a looping delay
-            if ((Date.now()-previous_time) > 2000){
-                console.log ("right_cursor.position.x: ", right_cursor.position.x,"handX: ", handX, handX-right_cursor.position.x );
-                if ( handX-right_cursor.position.x>5) {
-                    console.log ("right speed", rightSpeed );
-                
-                    console.log("swipe left detected");
-                    // animate here
-                    console.log("dispose object, ", obj);    
-                    obj.dispose();
-                    console.log("removing object from scene");    
-                    scene.remove(obj.mesh);
-                    scene.objects.splice(i, 1);        
-                    checkForSwipe = false;
-                }
-                handX = right_cursor.position.x;
-                previous_time = Date.now();
-                    
-            }  
-            break; 
-        }
-
         // ROTATING
         if (leftIsGrabbing && rightIsGrabbing && !currentlyRotatingObject) {
             console.log("rotating");
             currentlyRotatingObject = obj;
+            activeObject = currentlyRotatingObject;
             break;
         } else if (currentlyRotatingObject == obj && leftIsGrabbing && rightIsGrabbing) {
             if (Date.now()-rotating_delay > 1000){
@@ -210,16 +166,15 @@ export function animate(rightHand, leftHand, trainer) {
         }
         
         // GRABBING
-        // console.log("currently grabbed", currentlyGrabbedObject, "currently pinched", currentlyPinchedObject);
-            
+        // console.log("currently grabbed", currentlyGrabbedObject, "currently pinched", currentlyPinchedObject);  
         if (!currentlyGrabbedObject && !currentlyPinchedObject ) {
             // console.log("GRABBING?", !obj.isGrabbed, !leftIsGrabbing, rightIsGrabbing, obj.rightOverlapped);
             if (!obj.isGrabbed && !leftIsGrabbing && rightIsGrabbing && obj.rightOverlapped) { 
                 // grab and move object
                 obj.isGrabbed = true;
                 currentlyGrabbedObject = obj;
+                activeObject = currentlyGrabbedObject;
                 highlight(obj, 0xff7f7d);
-                grabbing_time = Date.now();
                 obj.grabOffsetX = obj.mesh.position.x - right_cursor.position.x;
                 obj.grabOffsetY = obj.mesh.position.y - right_cursor.position.y;
                 break;
@@ -242,6 +197,7 @@ export function animate(rightHand, leftHand, trainer) {
                 obj.rightPinch = true;
                 obj.leftPinch = true;
                 currentlyPinchedObject = obj;
+                activeObject = currentlyPinchedObject;
                 highlight(obj, 0x6bb3ff);
                 console.log("pinching! 0x6bb3ff", currentlyPinchedObject, currentlyGrabbedObject);
             }
@@ -266,6 +222,37 @@ export function animate(rightHand, leftHand, trainer) {
             obj.bounding_box = obj.computeScreenSpaceBoundingBox(obj.mesh);
         } 
 
+        //RECOGNIZE GESTURES
+        if (!currentlyGrabbedObject && !currentlyPinchedObject && gestureRecogitionOn) {
+            trainer.resume();
+            // nntrainer.resume();
+            trainer.on('FLATTEN', function() { 
+                if (activeObject && activeObject.type == "screenImage" && activeObject.flattenedCount == 0){
+                    console.log("flattening screen", activeObject);
+                    activeObject.flattenedCount +=1;
+                    activeObject.mesh.rotation.x -= Math.PI/2;
+                }
+                return;
+             });
+            trainer.on('SWIPE', function() { 
+                const index =  scene.objects.indexOf(activeObject);
+                if (activeObject && index>-1)  {
+                    console.log('SWIPE!'); 
+                    // activeObject.dispose();
+                    console.log("removing object from scene");    
+                    scene.remove(activeObject.mesh);
+                    if (index > -1) {
+                        scene.objects.splice(index, 1);
+                    }
+                    console.log(scene.objects);
+                }
+                return; 
+            });
+        } else {
+            trainer.pause();
+            // nntrainer.pause();
+        }
+
         // HIGHLIGHT IF HOVERED OVER
         if (!currentlyGrabbedObject && !currentlyPinchedObject && rightHand && rightHand.type) {
             if (!currentlyPinchedObject && obj.rightOverlapped){
@@ -281,15 +268,23 @@ export function animate(rightHand, leftHand, trainer) {
     renderer.render( scene, camera );
 
     // DISPLAY INFORMATION 
-    if(currentlyGrabbedObject) {
-        document.getElementById('object').innerHTML = '<p>'+currentlyGrabbedObject.name+'</p>';
-    } else if (currentlyPinchedObject) {
-        document.getElementById('object').innerHTML = '<p>'+currentlyPinchedObject.name+'</p>';
-    }
-    
+    if(activeObject) {
+        document.getElementById('object').innerHTML = '<p>'+activeObject.name+'</p>';
+    } 
 }
 
-renderer.render( scene, camera );
+// KEYBINDINGS
+
+//toggle gesture recognition
+hotkeys('g', function(event, handler){
+    event.preventDefault();
+    gestureRecogitionOn = !gestureRecogitionOn;
+});
+// reload the page
+hotkeys('r', function(event, handler){
+    event.preventDefault();
+    window.location.reload();
+});
 
 const highlight = (obj, color) => {
     if (!obj.isModel) {
@@ -304,23 +299,29 @@ const highlight = (obj, color) => {
             obj.mesh.material.color.set( color );
         }
     }
-    // console.log(obj.mesh, "obj.mesh");
 };
 
 const unhighlight = (obj) => {
     if (obj.mesh.userData.oldColor && (!obj.isModel )) {
         if (obj.mesh.material.color != obj.mesh.userData.oldColor) {
-            // console.log("unhighlight", obj.mesh.material.color, obj.mesh.userData.oldColor);
             obj.mesh.material.color.set(obj.mesh.userData.oldColor);
         }
     }
 };
 
-export function changeBackgroundColor(forScreenshare) {
-    if (forScreenshare) {
-        scene.background = new THREE.Color( 0x33ff77 );
-    } else {
-        scene.background = new THREE.Color( 0x000000 );
+// DOCUMENT EVENT LISTENERS
+document.getElementById("toggleBackground").addEventListener("click", toggleBackground);
 
+export function toggleBackground() {
+    forScreenshare = !forScreenshare;
+    if (forScreenshare) {
+        scene.background.set("lightgreen" );
+    } else {
+        scene.background.set("white");
     }
+    renderer.render( scene, camera );
+
 }
+
+
+renderer.render( scene, camera );

@@ -1,3 +1,50 @@
+body {
+	padding: 0;
+	margin: 0;
+}
+
+.sidebarWrapper {
+	position: absolute;
+	max-width: 20%;
+	height: 100%;
+	flex-direction: row-reverse;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: center;
+	background: aliceblue;
+}
+
+.sidebar {
+	flex-direction: column;
+	position: absolute;
+	height: 100vh;
+	width: 15vw;
+	background: aliceblue;
+	
+}
+
+.sidebarSection {
+	margin-bottom: 20px;
+}
+
+.hide {
+	display: none;
+}
+
+.arrow {
+	width: 0; 
+	height: 0; 
+	margin-top: 30px;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent; 
+	border-left: 10px solid black; 
+}
+
+.arrow.open {
+	position: absolute;
+	left: 15vw;
+	transform: rotate(180deg); /* Equal to rotateZ(45deg) */
+  }
+
 .info {
 	position: absolute;
 	top: 10px;
@@ -9,10 +56,13 @@
 
 .viewZone {
 	position: absolute;
-	top: 20%;
-	bottom: 20%;
-	left: 20%;
-	right: 20%; 
+	width: 960px;
+	height: 540px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
 	border-style: solid;
 	border-color: black;
 	text-align: center;

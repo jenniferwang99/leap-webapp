@@ -3,8 +3,6 @@ import { FontLoader } from 'https://cdn.skypack.dev/three/examples/jsm/loaders/F
 import { Object } from './object.js';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/DRACOLoader.js';
 
-
-
 export function load3DModel (filepath, scene, scaleFactor) {
     var mesh;
     var model;
@@ -40,7 +38,7 @@ export function loadSpriteImage(filepath, dimX, dimY, scene) {
     const material = new THREE.SpriteMaterial( { map: imageMap } );
     
     const sprite = new THREE.Sprite( material );
-    sprite.scale.set( dimX, dimY, 1 );
+    sprite.scale.set( dimX, dimY, .01 );
         
     sprite.position.set(0, 0, -1);
     
@@ -64,7 +62,7 @@ export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
             color: 'green' // top
         }),
         new THREE.MeshBasicMaterial({
-            color: 'blue' // bottom
+            color: 'black' // bottom
         }),
         new THREE.MeshBasicMaterial({
             map: textureLoader.load( filepath ) // front
@@ -76,7 +74,7 @@ export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
 
     var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-    var geometry = new THREE.BoxGeometry( dimX, dimY, 0.5 );
+    var geometry = new THREE.BoxGeometry( dimX, dimY, 0.01 );
     var boxMesh = new THREE.Mesh( geometry, faceMaterial );
     boxMesh.position.set(0, 0, -1);
     scene.add( boxMesh);
@@ -85,7 +83,7 @@ export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
     box.scaleFactor=scaleFactor;
     box.isModel = true;
     box.name = filepath;
+    box.type = "screenImage";
     console.log("mesh", boxMesh);
     scene.objects.push(box);
-
 }

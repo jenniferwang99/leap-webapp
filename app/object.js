@@ -9,7 +9,7 @@ export class Object {
     constructor(mesh) {
         this.mesh = mesh;
         this.name;
-        this.mixer = new AnimationMixer(mesh);
+        // this.mixer = new AnimationMixer(mesh);
         this.isGrabbed = false;
         this.grabOffsetX= 0;
         this.grabOffsetY = 0;
@@ -19,11 +19,13 @@ export class Object {
         this.rightPinch = false;
         this.leftPinch = false;
         this.isModel = false;
+        this.type = false;
+        this.flattenedCount = 0;
         this.width = 9999;
 
-        this.mesh.tick = this.mixer.update(0.25);
-        const fadeOutClip = new AnimationClip('fade-out', -1, [opacityKF]);
-        this.fadeOutAction = this.mixer.clipAction(fadeOutClip);
+        // this.mesh.tick = this.mixer.update(0.25);
+        // const fadeOutClip = new AnimationClip('fade-out', -1, [opacityKF]);
+        // this.fadeOutAction = this.mixer.clipAction(fadeOutClip);
 
         // only for images
         this.originalScaleX = this.mesh.scale.x;
@@ -44,7 +46,7 @@ export class Object {
     }
 
     setScale(target_width, right_cursor, left_cursor) {
-        this.mesh.position.set((right_cursor.position.x+left_cursor.position.x)/2, (right_cursor.position.y+left_cursor.position.y)/2, 0);
+        this.mesh.position.set((right_cursor.position.x+left_cursor.position.x)/2, (right_cursor.position.y+left_cursor.position.y)/2, -1);
         console.log(target_width, "target width");
         var proportion = target_width/this.originalScaleX;
         console.log(this.mesh.scale, this.scaleFactor);
@@ -69,7 +71,6 @@ export class Object {
         } else {
             bounding_box = new THREE.Box3().setFromObject(mesh);
         }
-
         // console.log(new THREE.Box3().setFromObject(mesh), "bounding box")
         var minX = bounding_box.min.x;
         var maxX = bounding_box.max.x;
