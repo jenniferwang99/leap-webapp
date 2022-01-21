@@ -18,7 +18,7 @@ body {
 	position: absolute;
 	height: 100vh;
 	width: 15vw;
-	background: aliceblue;
+	background: white;
 	
 }
 
@@ -45,7 +45,8 @@ body {
 	transform: rotate(180deg); /* Equal to rotateZ(45deg) */
   }
 
-.info {
+  /* currently not in use */
+.info { 
 	position: absolute;
 	top: 10px;
 	width: 100%;
@@ -54,10 +55,30 @@ body {
 	display:block;
 }
 
+.notifications {
+	position: absolute;
+	right: 20px;
+	text-align: right;
+}
+
 .viewZone {
 	position: absolute;
 	width: 960px;
 	height: 540px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-style: solid;
+	border-color: black;
+	text-align: center;
+}
+
+.viewZone2 {
+	position: absolute;
+	width: 540px;
+	height: 720px;
 	margin: auto;
 	left: 0;
 	right: 0;

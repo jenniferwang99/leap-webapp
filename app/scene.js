@@ -4,6 +4,7 @@ const SCREEN_OFFSET_X = 40;
 const SCREEN_OFFSET_Y = 350;
 const X_SCALE_OFFSET = 70;
 const Y_SCALE_OFFSET = 80;
+
 var rotating_delay = Date.now();
 var forScreenshare = false;
 var currentlyGrabbedObject = false;
@@ -228,24 +229,13 @@ export function animate(rightHand, leftHand, trainer) {
             // nntrainer.resume();
             trainer.on('FLATTEN', function() { 
                 if (activeObject && activeObject.type == "screenImage" && activeObject.flattenedCount == 0){
-                    console.log("flattening screen", activeObject);
                     activeObject.flattenedCount +=1;
                     activeObject.mesh.rotation.x -= Math.PI/2;
                 }
                 return;
              });
             trainer.on('SWIPE', function() { 
-                const index =  scene.objects.indexOf(activeObject);
-                if (activeObject && index>-1)  {
-                    console.log('SWIPE!'); 
-                    // activeObject.dispose();
-                    console.log("removing object from scene");    
-                    scene.remove(activeObject.mesh);
-                    if (index > -1) {
-                        scene.objects.splice(index, 1);
-                    }
-                    console.log(scene.objects);
-                }
+                removeObject(activeObject);
                 return; 
             });
         } else {
@@ -268,9 +258,7 @@ export function animate(rightHand, leftHand, trainer) {
     renderer.render( scene, camera );
 
     // DISPLAY INFORMATION 
-    if(activeObject) {
-        document.getElementById('object').innerHTML = '<p>'+activeObject.name+'</p>';
-    } 
+    if(activeObject) updateActiveObject();
 }
 
 // KEYBINDINGS
@@ -279,12 +267,54 @@ export function animate(rightHand, leftHand, trainer) {
 hotkeys('g', function(event, handler){
     event.preventDefault();
     gestureRecogitionOn = !gestureRecogitionOn;
+    document.getElementById('gestureRecognition').innerHTML = '<p> gesture recognition: '+gestureRecogitionOn+'</p>';
 });
 // reload the page
 hotkeys('r', function(event, handler){
     event.preventDefault();
     window.location.reload();
 });
+// shift active object
+hotkeys('right', function(event, handler){
+    event.preventDefault();
+    let i;
+    if (activeObject) {
+        i = scene.objects.indexOf(activeObject);
+        i=(i+1) % scene.objects.length;
+    } else {
+        i = 0;
+    }
+    activeObject = (scene.objects[i]);
+    updateActiveObject();
+    console.log(activeObject, "active object");
+});
+hotkeys('backspace', function(event, handler){
+    event.preventDefault();
+    removeObject(activeObject);
+});
+
+const removeObject = (object) =>{
+    const index =  scene.objects.indexOf(object);
+    if (object && index>-1)  {
+        console.log('SWIPE!'); 
+        // object.dispose();
+        console.log("removing object from scene");    
+        scene.remove(object.mesh);
+        if (index > -1) {
+            scene.objects.splice(index, 1);
+        }
+        console.log(scene.objects);
+        activeObject = false;
+        updateActiveObject();
+    }
+}
+
+const updateActiveObject = () => {
+    document.getElementById('activeObject').innerHTML = '<p> active object: '+activeObject.name+'</p>';
+}
+
+
+
 
 const highlight = (obj, color) => {
     if (!obj.isModel) {

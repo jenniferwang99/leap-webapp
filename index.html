@@ -24,12 +24,15 @@
 <body >
     <!-- <h1 class="info">example text that cannot be moved</h1> -->
     <div class="sidebarWrapper">
-        <div id="sidebarArrow" class="arrow open"></div>
-        <div id="sidebar" class="sidebar">
+        <div id="sidebarArrow" class="arrow"></div>
+        <div id="sidebar" class="sidebar hide">
             <h1>Sidebar</h1>
 
+            <p>Please set the LeapMotion Sensor in front of you.</p>
+            
             <div class="sidebarSection">
-                <button id="">Calibrate Sensor</button>
+                <p></p>
+                <button id="changeViewsButton">Change Views</button>
             </div>
             <div class="sidebarSection">
                 <p>Upload Images or 3D Models(.glb format)</p>
@@ -42,9 +45,12 @@
             
         </div>
     </div>
-    <div class="viewZone"> 
-        <div id="object"> </div>
-    
+    <div id="viewZone" class="viewZone"> </div>
+    <div id="viewZone2" class="viewZone2 hide"></div>
+    <div class="notifications">
+        <div id="gestureRecognition"></div> 
+        <div id = "gestureInfo"></div>
+        <div id="activeObject"> </div>
     </div>
   
 </body>
