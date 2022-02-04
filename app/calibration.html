@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!------------------------------------------------------------------------------
+| Copyright (C) 2012-2013 Leap Motion, Inc. All rights reserved.               |
+| Leap Motion proprietary and confidential. Not for distribution.              |
+| Use subject to the terms of the Leap Motion SDK Agreement available at       |
+| https://developer.leapmotion.com/sdk_agreement, or another agreement         |
+| between Leap Motion and you, your company or other organization.             |
+------------------------------------------------------------------------------->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Display Webcam Stream</title>
+<script src="http://js.leapmotion.com/leap-0.6.3.js"></script>
+<script src="https://cdn.rawgit.com/mrdoob/three.js/dev/build/three.min.js"></script>
+
+</head>
+ 
+<style>
+
+body {
+    text-align: center;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#videoElement {
+	width: 960px;
+	height: 540px;
+    background-color: #666;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    position: absolute;
+    margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+.viewZone {
+	position: absolute;
+	width: 960px;
+	height: 540px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-style: solid;
+	border-color: black;
+	text-align: center;
+}
+
+.container {
+    position: absolute;
+	width: 960px;
+	height: 540px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+.cross {
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    background-color: red;
+    color: white;
+    font-size: 40px;
+    line-height: 35px;
+    text-align: center;
+}
+
+#topLeft {
+    left: 20px;
+    right: 0;
+    top: 20px;
+    bottom: 0;
+}
+
+#center {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+.hide {
+    display: none;
+}
+
+.cross::before {
+  content: "+";
+}
+
+.info {
+    position:absolute;
+    text-align: center;
+    margin:auto;
+    left: 0;
+    right: 0;
+}
+
+.green {
+    background-color: green;
+}
+
+.button {
+    position: absolute;
+    bottom: 10;
+}
+
+</style>
+</head>
+ 
+<script src="app/calibration.js" type="module"></script>
+
+<body>
+    
+    <div id="viewZone" class="viewZone"> </div>
+    <div class="info">
+        <h1>Calibrate Sensor</h1>
+        <p>First, place your LeapMotion Sensor directly in front of you. Then place your hands over the LeapMotion Sensor.</p>
+        <p>Place your hand on top of the red '+' symbol that appears on the screen. Then, make a fist and hold until the cross turns green. Repeat for the next one.s</p>
+	</div>
+    <video autoplay="true" id="videoElement"></video>
+    <div class="container">
+        <div id="topLeft" class="cross hide"></div>
+        <div id="center"  class="cross hide"></div>
+    </div> 
+    <!-- <input type="button" id="recalibrate" class="button" name="Recalibrate">
+    <div>
+            </div> -->
+</body>
+</html>
