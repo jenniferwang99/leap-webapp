@@ -1,15 +1,7 @@
-import { NumberKeyframeTrack, AnimationClip, AnimationMixer } from 'https://cdn.skypack.dev/three';
-
-const times = [0, 1, 2];
-const values = [1, .5, 0];
-
-const opacityKF = new NumberKeyframeTrack('.material.opacity', times, values);
-
 export class Object {
     constructor(mesh) {
         this.mesh = mesh;
         this.name;
-        // this.mixer = new AnimationMixer(mesh);
         this.isGrabbed = false;
         this.grabOffsetX= 0;
         this.grabOffsetY = 0;
@@ -22,16 +14,29 @@ export class Object {
         this.type = false;
         this.flattenedCount = 0;
         this.width = 9999;
-
-        // this.mesh.tick = this.mixer.update(0.25);
-        // const fadeOutClip = new AnimationClip('fade-out', -1, [opacityKF]);
-        // this.fadeOutAction = this.mixer.clipAction(fadeOutClip);
-
+        this.locked = false;
+    
         // only for images
         this.originalScaleX = this.mesh.scale.x;
         this.originalScaleY = this.mesh.scale.y;
         this.originalScaleZ = this.mesh.scale.z;
         this.scaleFactor = 1;
+
+        // for rotating
+        this.MAX_ROTATION_ANGLES = {
+            x: {
+              // Vertical from bottom to top.
+              enabled: false,
+              from: Math.PI / 8,
+              to: Math.PI / 8,
+            },
+            y: {
+              // Horizontal from left to right.
+              enabled: false,
+              from: Math.PI / 4,
+              to: Math.PI / 4,
+            },
+          };
     }
 
     dispose() {
@@ -46,10 +51,15 @@ export class Object {
     }
 
     setScale(target_width, right_cursor, left_cursor) {
+        // update the scale
+        this.originalScaleX = this.mesh.scale.x;
+        this.originalScaleY = this.mesh.scale.y;
+        this.originalScaleZ = this.mesh.scale.z;
+
         this.mesh.position.set((right_cursor.position.x+left_cursor.position.x)/2, (right_cursor.position.y+left_cursor.position.y)/2, -1);
-        console.log(target_width, "target width");
+        // console.log(target_width, "target width");
         var proportion = target_width/this.originalScaleX;
-        console.log(this.mesh.scale, this.scaleFactor);
+        // console.log(this.mesh.scale, this.scaleFactor);
         this.mesh.scale.set(target_width*this.scaleFactor, this.originalScaleY*proportion*this.scaleFactor, this.originalScaleZ*proportion*this.scaleFactor);
         // newheight = new width/old width * old height
     }
@@ -83,4 +93,68 @@ export class Object {
         var boundingScreenspaceBox = new THREE.Box2(minVector, maxVector);
         return boundingScreenspaceBox;
     }
+
+    // for rotating
+
+    
+    /**
+         * isWithinMaxAngle
+         * @description Checks if the rotation in a specific axe is within the maximum
+         * values allowed.
+         * @param delta is the difference of the current rotation angle and the
+         *     expected rotation angle
+         * @param axe is the axe of rotation: x(vertical rotation), y (horizontal
+         *     rotation)
+         * @return true if the rotation with the new delta is included into the
+         *     allowed angle range, false otherwise
+         */
+    isWithinMaxAngle(delta, axe, mesh) {
+        if (this.MAX_ROTATION_ANGLES[axe].enabled) {
+            if (mesh.length > 1) {
+                let condition = true;
+                for (let i = 0; i < mesh.length; i++) {
+                if (!condition) return false;
+                if (this.MAX_ROTATION_ANGLES[axe].enabled) {
+                    condition = isRotationWithinMaxAngles(mesh[i], delta, axe);
+                }
+                }
+                return condition;
+            }
+            return isRotationWithinMaxAngles(mesh, delta, axe);
+            }
+        return true;
+    }
+
+    isRotationWithinMaxAngles(meshToRotate, delta, axe) {
+        return this.MAX_ROTATION_ANGLES[axe].from * -1 <
+        meshToRotate.rotation[axe] + delta &&
+        meshToRotate.rotation[axe] + delta < this.MAX_ROTATION_ANGLES[axe].to
+        ? true
+        : false;
+    }
+
+    rotateVertical(deltaMove, mesh) {
+        
+        console.log(deltaMove.y, "delta vert")
+        if (mesh.length > 1) {
+            for (let i = 0; i < mesh.length; i++) {
+                rotateVertical(deltaMove, mesh[i]);
+            }
+            return;
+        }
+        mesh.rotation.x += deltaMove.y * -0.5;
+    }
+
+    rotateHorizontal(deltaMove, mesh) {
+        
+        console.log(deltaMove.x, "delta horiz")
+        if (mesh.length > 1) {
+            for (let i = 0; i < mesh.length; i++) {
+            rotateHorizontal(deltaMove, this.mesh[i]);
+            }
+            return;
+        }
+        mesh.rotation.y += deltaMove.x * 0.5;
+    }
 }
+

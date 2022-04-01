@@ -1,22 +1,14 @@
 <!DOCTYPE html>
-<!------------------------------------------------------------------------------
-| Copyright (C) 2012-2013 Leap Motion, Inc. All rights reserved.               |
-| Leap Motion proprietary and confidential. Not for distribution.              |
-| Use subject to the terms of the Leap Motion SDK Agreement available at       |
-| https://developer.leapmotion.com/sdk_agreement, or another agreement         |
-| between Leap Motion and you, your company or other organization.             |
-------------------------------------------------------------------------------->
+
 <html>
 <head>
 <meta charset="utf-8">
-<title>Display Webcam Stream</title>
+<title>Calibrate Sensor</title>
 <script src="http://js.leapmotion.com/leap-0.6.3.js"></script>
 <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/build/three.min.js"></script>
-
 </head>
  
 <style>
-
 body {
     text-align: center;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -113,10 +105,7 @@ body {
     position: absolute;
     bottom: 10;
 }
-
 </style>
-</head>
- 
 <script src="app/calibration.js" type="module"></script>
 
 <body>
@@ -125,15 +114,12 @@ body {
     <div class="info">
         <h1>Calibrate Sensor</h1>
         <p>First, place your LeapMotion Sensor directly in front of you. Then place your hands over the LeapMotion Sensor.</p>
-        <p>Place your hand on top of the red '+' symbol that appears on the screen. Then, make a fist and hold until the cross turns green. Repeat for the next one.s</p>
+        <p>Place your hand on top of the red '+' symbol that appears on the screen. Then, make a fist and hold until the cross turns green. Repeat for the next one.</p>
 	</div>
     <video autoplay="true" id="videoElement"></video>
     <div class="container">
         <div id="topLeft" class="cross hide"></div>
         <div id="center"  class="cross hide"></div>
     </div> 
-    <!-- <input type="button" id="recalibrate" class="button" name="Recalibrate">
-    <div>
-            </div> -->
 </body>
 </html>

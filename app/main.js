@@ -5,7 +5,7 @@ import { flattenData, swipeData } from "./gestures.js";
 // Setup Leap loop with frame callback function
 // TRAIN LEAP
 var trainer = new LeapTrainer.Controller();
-var nntrainer = new LeapTrainer.ANNController();
+// var nntrainer = new LeapTrainer.ANNController();
 trainer.fromJSON(flattenData);
 trainer.fromJSON(swipeData);
 
@@ -27,7 +27,7 @@ var controller = Leap.loop(function(frame) {
   }
   
   if ((rightHand && rightHand.type) || (leftHand && leftHand.type)){
-    animate(rightHand, leftHand, trainer, nntrainer);
+    animate(rightHand, leftHand, trainer);
   }
 })
 
@@ -35,7 +35,7 @@ var controller = Leap.loop(function(frame) {
 var sidebarOpen = false;
 var views = "horizontal";
 document.getElementById("sidebarArrow").addEventListener("click", toggleSidebar);
-document.getElementById("changeViewsButton").addEventListener("click", toggleViews);
+document.getElementById("recalibrateButton").addEventListener("click", recalibrate);
 
 export function toggleSidebar() {
     console.log("sidebarOpen", sidebarOpen);
@@ -52,16 +52,6 @@ export function toggleSidebar() {
     }
 }
 
-export function toggleViews() {
-  const viewZone = document.getElementById("viewZone");
-  const viewZone2 = document.getElementById("viewZone2");
-  if (views == "horizontal") {
-    viewZone2.classList.remove("hide");
-    viewZone.classList.add("hide");
-    views = "vertical";
-  } else {
-    viewZone.classList.remove("hide");
-    viewZone2.classList.add("hide");
-    views = "horizontal";
-  }
+export function recalibrate() {
+  window.location.replace("http://localhost:8000/calibration.html")
 }

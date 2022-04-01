@@ -89,13 +89,15 @@ export function animate(rightHand) {
         rightCursorPosition = new THREE.Vector3( rightPalmPosition[0]-SCREEN_OFFSET_X, rightPalmPosition[1]-SCREEN_OFFSET_Y, 1 );
         document.getElementById("center").classList.remove("hide")
         if (prevState == 0 && rightHand.grabStrength == 1) {
+          console.log("grabbing!")
             calibrate(rightCursorPosition);
             prevState = 1;
-        } else if ( ((Date.now()-delay) > 10000) && prevState == 1 && rightHand.grabStrength != 1) {
-            prevState = 0;
+        } else if ( ((Date.now()-delay) > 5000) && prevState == 1 && rightHand.grabStrength != 1) {
+          console.log("grabbing part 2!")
+          prevState = 0;
             delay = Date.now();
         } else {
-            console.log(Date.now()-delay);
+            // console.log(Date.now()-delay);
         }
     } else {
         return;
@@ -123,11 +125,11 @@ function calibrate(cursorPosition) {
         console.log(rightCursorPosition.x, rightCursorPosition.x/(-3.9), rightCursorPosition.y,rightCursorPosition.y/2.05, "x and y offset scale");
         document.getElementById("topLeft").classList.add("green")
         document.getElementById("center").classList.add("hide")
+        window.location.replace("http://localhost:8000/?xscreen="+SCREEN_OFFSET_X+"&yscreen="+SCREEN_OFFSET_Y+"&xscale="+X_SCALE_OFFSET+"&yscale="+Y_SCALE_OFFSET)
         return;
     } else {
         console.log(SCREEN_OFFSET_X, SCREEN_OFFSET_Y, X_SCALE_OFFSET, Y_SCALE_OFFSET);
-        window.location.replace("http://localhost:8000/")
-    }
+   }
 }
 
 
@@ -139,13 +141,8 @@ if (navigator.mediaDevices.getUserMedia) {
     .then(function (stream) {
       video.srcObject = stream;
     })
-    .catch(function (err0r) {
+    .catch(function () {
       console.log("Something went wrong!");
     });
 }
 
-document.getElementById("recalibrate").addEventListener("click", recalibrate);
-
-export function recalibrate() {
-    window.location.reload();
-}

@@ -10,31 +10,39 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Leap Sensor PlayTest</title>
-<!-- <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script> -->
-<script src="http://js.leapmotion.com/leap-0.6.3.js" ></script>
-<script src="lib/leaptrainer.js"></script>
-<script src="https://cdn.rawgit.com/mrdoob/three.js/dev/build/three.min.js"></script>
-<script src="app/DRACOLoader.js"></script>
-<script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+<script src="http://js.leapmotion.com/leap-0.6.3.js" ></script> 
+ <script src="lib/leaptrainer.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>  
 
 <link rel="stylesheet" href="styles.css">
 </head>
-<body >
-    <!-- <h1 class="info">example text that cannot be moved</h1> -->
+<body>
     <div class="sidebarWrapper">
         <div id="sidebarArrow" class="arrow"></div>
         <div id="sidebar" class="sidebar hide">
-            <h1>Sidebar</h1>
-
-            <p>Please set the LeapMotion Sensor in front of you.</p>
             
             <div class="sidebarSection">
                 <p></p>
-                <button id="changeViewsButton">Change Views</button>
+                <button id="recalibrateButton">Recalibrate Sensor</button>
             </div>
             <div class="sidebarSection">
-                <p>Upload Images or 3D Models(.glb format)</p>
-                <input type="file"/>
+                <p>Upload Images(.png or .jpg) or 3D Models(.glb format)</p>
+                <form action="#" id="fileUpload">
+                    <input type="file" name="file[]" id="files" multiple/> <br>
+                    <input type="checkbox" id="isSlide" name="isSlide" value="false"> 
+                    <label for="isSlide"> Slides</label><br>
+                    <input type="submit" />
+                </form>
+            </div>
+
+            <div class="slides">
+                Slide Preview
+
+                <div id="slidePreviews">
+                    
+                </div>
+
             </div>
             
             <div class="sidebarSection">
@@ -43,17 +51,24 @@
             
         </div>
     </div>
-    <div id="viewZone" class="viewZone"> </div>
-    <div id="viewZone2" class="viewZone2 hide"></div>
-    <div class="notifications">
-        <div id="gestureRecognition"></div> 
-        <div id = "gestureInfo"></div>
-        <div id="activeObject"> </div>
+    <div id="viewZone" class="viewZone"> 
+        <div class="notifications">
+            <div id="gestureRecognition"></div> 
+            <div id = "gestureInfo"></div>
+            <div id="activeObject"> </div>
+        </div>
     </div>
+    
   
 </body>
+<script type="text/javascript" src="https://unpkg.com/imagekit-javascript/dist/imagekit.min.js"></script>
+<script src="./node_modules/sortablejs/Sortable.min.js"></script>
+
 <script src="app/main.js" type="module"></script>
 <script src="app/scene.js" type="module"></script>
+<script>
 
-<!-- <script src="app/trainer.js" type="module"></script> -->
+    new Sortable(document.getElementById('slidePreview'));
+    
+    </script>
 </html>

@@ -18,8 +18,20 @@ body {
 	position: absolute;
 	height: 100vh;
 	width: 15vw;
-	background: white;
-	
+	background: aliceblue;
+}
+
+.sidebarSection {
+	padding: 12px;
+}
+#slidePreviews {
+	overflow-y: scroll;
+	max-height: 50vh;
+	padding: 8px;
+}
+
+.slides {
+	margin: 12px;
 }
 
 .sidebarSection {

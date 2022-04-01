@@ -1,9 +1,14 @@
-import { load3DModel, loadSpriteImage, loadImageScreen } from "../../app/loaders.js";
+import { loadSpriteImage, load3DModel, loadImageScreen } from "../../app/loaders.js";
+import { Object } from './object.js';
 // CONSTANTS
-const SCREEN_OFFSET_X = 40;
-const SCREEN_OFFSET_Y = 350;
-const X_SCALE_OFFSET = 70;
-const Y_SCALE_OFFSET = 80;
+
+const queryString = window.location.search;
+console.log(queryString);
+const urlParams = new URLSearchParams(queryString);
+const SCREEN_OFFSET_X = parseFloat(urlParams.get("xscreen")) || 40;
+const SCREEN_OFFSET_Y = parseFloat(urlParams.get("yscreen")) || 350;
+const X_SCALE_OFFSET = parseFloat(urlParams.get("xscale"))+10 || 70;
+const Y_SCALE_OFFSET = parseFloat(urlParams.get("yscale")) || 80;
 
 var rotating_delay = Date.now();
 var forScreenshare = false;
@@ -39,11 +44,103 @@ function onWindowResize() {
 
 window.addEventListener('resize', onWindowResize, false);
 
+
+// IMAGE UPLOAD
+document.getElementById("fileUpload").addEventListener("submit", upload);
+var imagekit = new ImageKit({
+    publicKey: "public_HDWMj/1g2MZbnJ1y4VDMcmou9Xg=",
+    urlEndpoint: "https://ik.imagekit.io/jennwang", // https://ik.imagekit.io/your_imagekit_id
+    authenticationEndpoint: "http://localhost:3000/signature"
+});
+
+var slideURLs =[];
+// Upload function internally uses the ImageKit.io javascript SDK
+function upload(e) {
+    e.preventDefault();
+    console.log(e.target.input, "input");
+    var files = document.getElementById("files").files;
+    console.log("files submitted: ", files);
+    for (let i = 0, numFiles = files.length; i < numFiles; i++) {
+        console.log(files[i]);
+        var file = files[i];
+        imagekit.upload({
+            file: files[i],
+            fileName: files[i].name || "sample-file.jpg",
+            tags: ["meng"], // Comma seperated value of tags
+            responseFields: "tags" // Comma seperated values of fields you want in response e.g. tags, isPrivateFile etc
+        }, function (err, result) {
+            if (err) {
+                alert("Error in file upload. Check console logs for error response");
+                console.log(err);
+            } else {
+                console.log(result);
+                console.log(result.url);
+                var slides = document.getElementById("isSlide");
+                if (slides.checked) {
+                    var slidePreviews = document.getElementById('slidePreviews'),
+                        src = result.url,
+                        img = document.createElement('img');
+                    img.src = src;
+                    img.width = 150;
+                    slidePreviews.appendChild(img);
+                } else if (file.type.startsWith("image")) {
+                    loadImageScreen(result.url, scene, false);
+                } else {
+                    console.log("3d model submitted!")
+                    let obj = load3DModel(result.url, scene, 1);
+                    console.log(obj, "obj")
+                }
+                
+                renderer.render( scene, camera );
+            }
+        }) 
+    };
+}
+
+
+// slide
+var slidePreviews = document.getElementById('slidePreviews');
+var sortableSlides = new Sortable(slidePreviews, {
+    animation: 150
+});
+
+slidePreviews.addEventListener("drag", updateSlideOrder);
+
+function updateSlideOrder() { // this can be optimized
+    slideURLs = [];
+    console.log(slidePreviews.children);
+    var slides = slidePreviews.children;
+    for (let slide of slides) {
+        console.log(slide.getAttribute("src"));
+        slideURLs.push(slide.getAttribute("src"));
+    }
+}
+
+// load in slide
+hotkeys('right', function(event){
+    event.preventDefault();
+    if (!slideURLs) {
+        updateSlideOrder();
+        console.log("slideURL" , slideURLs[0]);
+    }
+    loadSpriteImage(slideURLs[0], scene, true);
+    slideURLs.splice(0, 1);
+    renderer.render( scene, camera );
+});
+
 // LOADERS
-// loadSpriteImage('img/baozi.jpg', 4, 3, scene);
+// loadImageScreen('img/baozi.jpg', scene, 4, 3, 1);
 // loadSpriteImage('img/kimchi_fried_rice.JPG' , 3, 4, scene)
 load3DModel('assets/city.glb', scene, 0.1);
-loadImageScreen('img/baozi.jpg', scene, 4, 3, 0.5);
+
+// trash bin
+const geometry = new THREE.BoxGeometry( .8, .8, .8 );
+const material = new THREE.MeshBasicMaterial( {color: "grey"} );
+const cube = new THREE.Mesh( geometry, material );
+cube.position.set(-4, -3, 0);
+scene.add( cube );
+var trash = new Object(cube);
+trash.userData = {highlighted: false}
 
 //CREATE CURSORS
 const right_cursor_geo = new THREE.CircleGeometry( 0.1, 32 );
@@ -63,6 +160,11 @@ camera.position.z = 5;
 const empty_vector = new THREE.Vector3( 0, 0, 0);
 
 console.log(scene.objects);
+
+// these values are for rotation
+let rotationSpeed = 0.05,
+    prevCursorPosition = empty_vector;
+
 
 export function animate(rightHand, leftHand, trainer) {
 	requestAnimationFrame( animate );
@@ -93,12 +195,14 @@ export function animate(rightHand, leftHand, trainer) {
     }
 
     if (leftHand && leftHand.type) {
+        // console.log("left hand exists!")
         leftSpeed = leftHand.palmVelocity ? leftHand.palmVelocity : [0, 0, 0];
         // console.log("left speed: ", leftSpeed);
         left_cursor.userData.velocity = leftSpeed;
         
         leftPalmPosition = leftHand.palmPosition;
-        leftCursorPosition = new THREE.Vector3( leftPalmPosition[0]+SCREEN_OFFSET_X, leftPalmPosition[1]-SCREEN_OFFSET_Y, 0 );
+        leftCursorPosition = new THREE.Vector3( leftPalmPosition[0]-SCREEN_OFFSET_X+60, leftPalmPosition[1]-SCREEN_OFFSET_Y, 0 );
+        // console.log(leftCursorPosition, "left cursor pos")
         if (leftHand.grabStrength == 1) {
             left_cursor.userData.isGrabbing =true;
         } else {
@@ -127,6 +231,15 @@ export function animate(rightHand, leftHand, trainer) {
     if (!leftCursorPosition.equals(empty_vector)){
         left_cursor.position.set(leftCursorPosition.x/X_SCALE_OFFSET, leftCursorPosition.y/Y_SCALE_OFFSET, 0);
     }
+    
+    if (trash.contains(right_cursor)) {
+        highlight(trash, "pink");
+        trash.userData.highlighted = true;
+        removeObject(activeObject);
+    } else {
+        unhighlight(trash);
+        trash.userData.highlighted = false;
+    }
 
     // loop through all objects in scene
     for (var i = scene.objects.length - 1; i >= 0; i--)  {
@@ -146,25 +259,43 @@ export function animate(rightHand, leftHand, trainer) {
         }
         
         // ROTATING
-        if (leftIsGrabbing && rightIsGrabbing && !currentlyRotatingObject) {
-            console.log("rotating");
-            currentlyRotatingObject = obj;
-            activeObject = currentlyRotatingObject;
-            break;
-        } else if (currentlyRotatingObject == obj && leftIsGrabbing && rightIsGrabbing) {
-            if (Date.now()-rotating_delay > 1000){
-                if (right_cursor.position.x > left_cursor.position.x) {
-                    // rotate to the right
-                    obj.mesh.rotation.y += Math.PI/4;
-                } else {
-                    obj.mesh.rotation.y -= Math.PI/4;
-                } 
-                rotating_delay = Date.now();
+        if (currentlyRotatingObject && currentlyRotatingObject == obj) {
+            if (rightIsGrabbing) {
+                const deltaMove = {
+                  x: right_cursor.position.x - prevCursorPosition.x,
+                  y: right_cursor.position.y - prevCursorPosition.y,
+                };
+                console.log(deltaMove, "deltaMove")
+                prevCursorPosition = { x: right_cursor.position.x, y: right_cursor.position.y };
+          
+                if (deltaMove.x != 0) {
+                  // && (Math.abs(deltaMove.x) > Math.abs(deltaMove.y))) {
+                  // enabling this, the mesh will rotate only in one specific direction
+                  // for mouse movement
+                  if (!obj.isWithinMaxAngle(Math.sign(deltaMove.x) * rotationSpeed, "y", obj.mesh)) {
+                    console.log("BAD HORIZ ANGLE")
+                    return;
+                  }
+                  obj.rotateHorizontal(deltaMove, obj.mesh);
+                }
+          
+                if (deltaMove.y != 0) {
+                  // &&(Math.abs(deltaMove.y) > Math.abs(deltaMove.x)) //
+                  // enabling this, the mesh will rotate only in one specific direction for
+                  // mouse movement
+                  if (!obj.isWithinMaxAngle(Math.sign(deltaMove.y) * rotationSpeed, "x", obj.mesh)) {
+                    console.log("BAD ANGLE")
+                    return;
+                  }
+                  obj.rotateVertical(deltaMove, obj.mesh);
+                }
+                break;
+            } else {
+                currentlyRotatingObject = false; 
+                break;
             }
-            break;
-        } else {
-            currentlyRotatingObject = false;   
-        }
+        } 
+
         
         // GRABBING
         // console.log("currently grabbed", currentlyGrabbedObject, "currently pinched", currentlyPinchedObject);  
@@ -172,17 +303,27 @@ export function animate(rightHand, leftHand, trainer) {
             // console.log("GRABBING?", !obj.isGrabbed, !leftIsGrabbing, rightIsGrabbing, obj.rightOverlapped);
             if (!obj.isGrabbed && !leftIsGrabbing && rightIsGrabbing && obj.rightOverlapped) { 
                 // grab and move object
-                obj.isGrabbed = true;
-                currentlyGrabbedObject = obj;
-                activeObject = currentlyGrabbedObject;
-                highlight(obj, 0xff7f7d);
-                obj.grabOffsetX = obj.mesh.position.x - right_cursor.position.x;
-                obj.grabOffsetY = obj.mesh.position.y - right_cursor.position.y;
+                if (obj.locked) {
+                    // ROTATING
+                    console.log("setting rotating object!");
+                    currentlyRotatingObject = obj;
+                    activeObject = currentlyRotatingObject;
+                    prevCursorPosition = { x: right_cursor.position.x, y: right_cursor.position.y };
+                    break;
+                } else {
+                    obj.isGrabbed = true;
+                    currentlyGrabbedObject = obj;
+                    activeObject = currentlyGrabbedObject;
+                    highlight(obj, 0xff7f7d);
+                    obj.grabOffsetX = obj.mesh.position.x - right_cursor.position.x;
+                    obj.grabOffsetY = obj.mesh.position.y - right_cursor.position.y;
+                }
                 break;
             }
         } else if (currentlyGrabbedObject == obj && !leftIsGrabbing && rightIsGrabbing && obj.isGrabbed){
             // console.log("offsets: ", obj.mesh.position.x - right_cursor.position.x, obj.mesh.position.y - right_cursor.position.y )
             obj.setPosition(right_cursor);
+            
             break;
         } else if (currentlyGrabbedObject == obj && !rightIsGrabbing) {
             console.log("right is no longer grabbing");
@@ -203,10 +344,11 @@ export function animate(rightHand, leftHand, trainer) {
                 console.log("pinching! 0x6bb3ff", currentlyPinchedObject, currentlyGrabbedObject);
             }
         } else if (currentlyPinchedObject == obj & leftIsPinching && rightIsPinching) {
-            console.log("in the right place!");
+            console.log("in pinching place!");
             highlight(obj, 0x6bb3ff);
                 
             var distance = right_cursor.position.x - left_cursor.position.x;
+            console.log(distance, "distance");
             if (Math.abs(obj.width-distance)>0.005) {
                 // console.log("bounding box min and max: ", obj.bounding_box.min, obj.bounding_box.max);
                 obj.setScale(distance, right_cursor, left_cursor);
@@ -234,10 +376,6 @@ export function animate(rightHand, leftHand, trainer) {
                 }
                 return;
              });
-            trainer.on('SWIPE', function() { 
-                removeObject(activeObject);
-                return; 
-            });
         } else {
             trainer.pause();
             // nntrainer.pause();
@@ -269,13 +407,20 @@ hotkeys('g', function(event, handler){
     gestureRecogitionOn = !gestureRecogitionOn;
     document.getElementById('gestureRecognition').innerHTML = '<p> gesture recognition: '+gestureRecogitionOn+'</p>';
 });
+// lock position for rotating
+hotkeys('l', function(event, handler){
+    event.preventDefault();
+    activeObject.locked = !activeObject.locked;
+    console.log("activeObject.locked", activeObject.locked)
+    
+});
 // reload the page
 hotkeys('r', function(event, handler){
     event.preventDefault();
     window.location.reload();
 });
 // shift active object
-hotkeys('right', function(event, handler){
+hotkeys('down', function(event, handler){
     event.preventDefault();
     let i;
     if (activeObject) {
@@ -293,11 +438,14 @@ hotkeys('backspace', function(event, handler){
     removeObject(activeObject);
 });
 
+
 const removeObject = (object) =>{
     const index =  scene.objects.indexOf(object);
     if (object && index>-1)  {
-        console.log('SWIPE!'); 
-        // object.dispose();
+        // console.log('SWIPE!'); 
+        if (!object.isModel) {
+            object.dispose();
+        }
         console.log("removing object from scene");    
         scene.remove(object.mesh);
         if (index > -1) {
@@ -307,14 +455,13 @@ const removeObject = (object) =>{
         activeObject = false;
         updateActiveObject();
     }
+    renderer.render( scene, camera );
+
 }
 
 const updateActiveObject = () => {
     document.getElementById('activeObject').innerHTML = '<p> active object: '+activeObject.name+'</p>';
 }
-
-
-
 
 const highlight = (obj, color) => {
     if (!obj.isModel) {
@@ -352,6 +499,5 @@ export function toggleBackground() {
     renderer.render( scene, camera );
 
 }
-
 
 renderer.render( scene, camera );

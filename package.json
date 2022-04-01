@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "express": "^4.17.2",
+    "imagekit": "^3.2.4",
+    "sortablejs": "^1.14.0"
+  }
+}
