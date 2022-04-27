@@ -147,13 +147,13 @@ const right_cursor_geo = new THREE.CircleGeometry( 0.1, 32 );
 const right_cursor_material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 const right_cursor = new THREE.Mesh( right_cursor_geo, right_cursor_material );
 scene.add( right_cursor );
-right_cursor.userData = { isGrabbing: false, isPinching: false };
+right_cursor.userData = { isGrabbing: false, isPinching: false, prevX: 0, prevY: 0};
 
 const left_cursor_geo = new THREE.CircleGeometry( 0.1, 32 );
 const left_cursor_material = new THREE.MeshBasicMaterial( { color: 0xff0f00 } );
 const left_cursor = new THREE.Mesh( left_cursor_geo, left_cursor_material );
 scene.add( left_cursor );
-left_cursor.userData = { isGrabbing: false, isPinching: false };    
+left_cursor.userData = { isGrabbing: false, isPinching: false , prevX: 0, prevY: 0};    
 
 camera.position.z = 5;
 
@@ -341,19 +341,25 @@ export function animate(rightHand, leftHand, trainer) {
                 currentlyPinchedObject = obj;
                 activeObject = currentlyPinchedObject;
                 highlight(obj, 0x6bb3ff);
-                console.log("pinching! 0x6bb3ff", currentlyPinchedObject, currentlyGrabbedObject);
+                console.log("pinching!", currentlyPinchedObject, currentlyGrabbedObject);
+                right_cursor.userData.prevX = right_cursor.position.x;
+                right_cursor.userData.prevY = right_cursor.position.y;
+                left_cursor.userData.prevX = left_cursor.position.x;
+                left_cursor.userData.prevY = left_cursor.position.y;
             }
         } else if (currentlyPinchedObject == obj & leftIsPinching && rightIsPinching) {
             console.log("in pinching place!");
             highlight(obj, 0x6bb3ff);
                 
             var distance = right_cursor.position.x - left_cursor.position.x;
-            console.log(distance, "distance");
             if (Math.abs(obj.width-distance)>0.005) {
                 // console.log("bounding box min and max: ", obj.bounding_box.min, obj.bounding_box.max);
-                obj.setScale(distance, right_cursor, left_cursor);
+                // // center mesh
+                // obj.mesh.position.set((right_cursor.position.x+left_cursor.position.x)/2, (right_cursor.position.y+left_cursor.position.y)/2, -1);
+                
+                obj.setScale(right_cursor, left_cursor);
                 obj.bounding_box = obj.computeScreenSpaceBoundingBox(obj.mesh);
-                obj.width = distance;
+                // obj.width = distance;
             }
             break;
         } else if (currentlyPinchedObject == obj & !leftIsPinching && !rightIsPinching) {

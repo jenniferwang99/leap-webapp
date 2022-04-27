@@ -13,7 +13,7 @@ export class Object {
         this.isModel = false;
         this.type = false;
         this.flattenedCount = 0;
-        this.width = 9999;
+        this.width;
         this.locked = false;
     
         // only for images
@@ -50,18 +50,34 @@ export class Object {
         this.mesh.position.set(right_cursor.position.x+this.grabOffsetX, right_cursor.position.y+this.grabOffsetY, right_cursor.position.z-1);
     }
 
-    setScale(target_width, right_cursor, left_cursor) {
+    setScale(right_cursor, left_cursor) {
         // update the scale
         this.originalScaleX = this.mesh.scale.x;
         this.originalScaleY = this.mesh.scale.y;
         this.originalScaleZ = this.mesh.scale.z;
 
-        this.mesh.position.set((right_cursor.position.x+left_cursor.position.x)/2, (right_cursor.position.y+left_cursor.position.y)/2, -1);
-        // console.log(target_width, "target width");
-        var proportion = target_width/this.originalScaleX;
-        // console.log(this.mesh.scale, this.scaleFactor);
-        this.mesh.scale.set(target_width*this.scaleFactor, this.originalScaleY*proportion*this.scaleFactor, this.originalScaleZ*proportion*this.scaleFactor);
-        // newheight = new width/old width * old height
+        var dist0 = right_cursor.userData.prevX - left_cursor.userData.prevX;
+        var dist1 = right_cursor.position.x - left_cursor.position.x;
+        console.log(dist0, dist1, this.width);
+        var proportion = dist0/dist1;
+        var new_width;
+        if (proportion>1){
+            new_width = Math.max(proportion*this.width, dist1)
+        } else {
+            new_width = Math.min(proportion*this.width, dist1)    
+        }
+        
+        right_cursor.userData.prevX = right_cursor.position.x;
+        left_cursor.userData.prevX = left_cursor.position.x;
+        console.log(proportion, "proportion", new_width, "new width", dist1, "dist1")
+
+        this.mesh.scale.set(this.originalScaleX/proportion, this.originalScaleY/proportion, this.originalScaleZ/proportion)
+
+        // // console.log(target_width, "target width");
+        // var proportion = target_width/this.originalScaleX;
+        // console.log("scale", this.mesh.scale, this.scaleFactor);
+        // this.mesh.scale.set(target_width*this.scaleFactor, this.originalScaleY*proportion*this.scaleFactor, this.originalScaleZ*proportion*this.scaleFactor);
+        
     }
 
     contains(cursor) {
@@ -86,6 +102,7 @@ export class Object {
         var maxX = bounding_box.max.x;
         var minY = bounding_box.min.y;
         var maxY = bounding_box.max.y;
+        this.width = maxX-minX;
 
         var minVector = new THREE.Vector2(minX, minY);
         var maxVector = new THREE.Vector2(maxX, maxY);

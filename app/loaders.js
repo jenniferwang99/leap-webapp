@@ -61,13 +61,13 @@ export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
     var width;
     var materials = [
         new THREE.MeshBasicMaterial({
-            color: 'pink' //left
+            color: 'black' //left
         }),
         new THREE.MeshBasicMaterial({
-            color: 'orange' //right
+            color: 'black' //right
         }),
         new THREE.MeshBasicMaterial({
-            color: 'green' // top
+            color: 'black' // top
         }),
         new THREE.MeshBasicMaterial({
             color: 'black' // bottom
@@ -79,11 +79,11 @@ export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
                 width = tex.image.width;
                 geometry = new THREE.BoxGeometry( 1, tex.image.height / tex.image.width, 0.01 );
     
-                console.log("scale based on tex", sprite.scale);
+                // console.log("scale based on tex", sprite.scale);
               } ) // front
         }),
         new THREE.MeshBasicMaterial({
-            color: 'yellow' //back
+            color: 'black' //back
         })
     ];
 
