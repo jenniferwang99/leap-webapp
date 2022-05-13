@@ -32,6 +32,7 @@ export function load3DModel (filepath, scene, scaleFactor) {
 }
 
 export function loadSpriteImage(filepath, scene) {
+    console.log("loading sprite")
     var sprite;
     var height;
     var width;
@@ -54,49 +55,39 @@ export function loadSpriteImage(filepath, scene) {
 }
 
 
-export function loadImageScreen(filepath, scene, dimX, dimY, scaleFactor) {
+export function loadImageScreen(filepath, scene, scaleFactor=1) {
     var textureLoader = new THREE.TextureLoader();
-    var geometry;
     var height;
     var width;
+    var tex = textureLoader.load( filepath, (tex) => {
+        height = tex.image.height;
+        width = tex.image.width;
+    });
+
+
+    var geometry = new THREE.BoxGeometry(  5, 3, .01 );
     var materials = [
+        new THREE.MeshBasicMaterial( {color: 'pink'} ),
+        new THREE.MeshBasicMaterial( {color: 'pink'} ),
+        new THREE.MeshBasicMaterial( {color: 0x00ff00} ),
+        new THREE.MeshBasicMaterial( {color: 'pink'} ),
         new THREE.MeshBasicMaterial({
-            color: 'black' //left
-        }),
-        new THREE.MeshBasicMaterial({
-            color: 'black' //right
-        }),
-        new THREE.MeshBasicMaterial({
-            color: 'black' // top
-        }),
-        new THREE.MeshBasicMaterial({
-            color: 'black' // bottom
-        }),
-        new THREE.MeshBasicMaterial({
-            map: textureLoader.load( filepath, (tex) => {
-                tex.needsUpdate = true;
-                height = tex.image.height;
-                width = tex.image.width;
-                geometry = new THREE.BoxGeometry( 1, tex.image.height / tex.image.width, 0.01 );
+                map: textureLoader.load( filepath, (tex) => {
+                    tex.needsUpdate = true;
+                    geometry = new THREE.BoxGeometry( 1, tex.image.height / tex.image.width, 0.01 );
+                    console.log("geometry", geometry);
+                  } ) // front
+                // color: 'pink'
+            }),
+        new THREE.MeshBasicMaterial( {color: 0x00ff00} )];
+    const boxMesh = new THREE.Mesh( geometry, materials );
+    scene.add( boxMesh );
     
-                // console.log("scale based on tex", sprite.scale);
-              } ) // front
-        }),
-        new THREE.MeshBasicMaterial({
-            color: 'black' //back
-        })
-    ];
-
-    var faceMaterial = new THREE.MeshFaceMaterial( materials );
-    var boxMesh = new THREE.Mesh( geometry, faceMaterial );
-    boxMesh.position.set(0, 0, -1);
-    scene.add( boxMesh);
-
     var box = new Object(boxMesh);
     box.scaleFactor=scaleFactor;
     box.isModel = true;
     box.name = filepath;
     box.type = "screenImage";
-    console.log("mesh", boxMesh);
+    console.log("box mesh", boxMesh);
     scene.objects.push(box);
 }

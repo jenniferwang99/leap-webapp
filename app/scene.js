@@ -84,7 +84,7 @@ function upload(e) {
                     img.width = 150;
                     slidePreviews.appendChild(img);
                 } else if (file.type.startsWith("image")) {
-                    loadImageScreen(result.url, scene, false);
+                    loadImageScreen(result.url, scene);
                 } else {
                     console.log("3d model submitted!")
                     let obj = load3DModel(result.url, scene, 1);
@@ -118,6 +118,7 @@ function updateSlideOrder() { // this can be optimized
 
 // load in slide
 hotkeys('right', function(event){
+    console.log("right arrow pressed")
     event.preventDefault();
     if (!slideURLs) {
         updateSlideOrder();
@@ -129,9 +130,9 @@ hotkeys('right', function(event){
 });
 
 // LOADERS
-// loadImageScreen('img/baozi.jpg', scene, 4, 3, 1);
-// loadSpriteImage('img/kimchi_fried_rice.JPG' , 3, 4, scene)
-load3DModel('assets/city.glb', scene, 0.1);
+// loadImageScreen('img/Slide6.JPG', scene);
+// loadSpriteImage('img/Slide6.jpg', scene);
+// load3DModel('assets/city.glb', scene, 0.1);
 
 // trash bin
 const geometry = new THREE.BoxGeometry( .8, .8, .8 );

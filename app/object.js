@@ -69,15 +69,9 @@ export class Object {
         
         right_cursor.userData.prevX = right_cursor.position.x;
         left_cursor.userData.prevX = left_cursor.position.x;
-        console.log(proportion, "proportion", new_width, "new width", dist1, "dist1")
+        // console.log(proportion, "proportion", new_width, "new width", dist1, "dist1")
 
         this.mesh.scale.set(this.originalScaleX/proportion, this.originalScaleY/proportion, this.originalScaleZ/proportion)
-
-        // // console.log(target_width, "target width");
-        // var proportion = target_width/this.originalScaleX;
-        // console.log("scale", this.mesh.scale, this.scaleFactor);
-        // this.mesh.scale.set(target_width*this.scaleFactor, this.originalScaleY*proportion*this.scaleFactor, this.originalScaleZ*proportion*this.scaleFactor);
-        
     }
 
     contains(cursor) {
