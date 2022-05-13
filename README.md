@@ -1,15 +1,29 @@
 # Instructions
 
 ### Table of contents
-- [Environment](#environment)
-- [Dataset](#dataset)
-- [Training and evaluation](#training-and-evaluation)
-- [Development and test the code](#development-and-test-the-code)
+- [Installation](#installation)
+- [How to Run](#howtorun)
 
-## Environment
-The project is based on Python 3.6, to manage the dependencies contained in 
-[`requirements.txt`](requirements.txt) a virtual environment is recommended.
+## Installation
+The project uses ES6 Javascript and ThreeJS.
+
+To install, first clone this directory. Then cd into the directory and run:
 
 ```
 npm install .
 ```
+
+## How to Run
+
+To start the server, run:
+```
+node server.js
+```
+
+To run the web app locally, run:
+```
+python -m http.server
+```
+
+
+
